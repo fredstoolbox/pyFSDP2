@@ -5,8 +5,8 @@ Link to pytorch's FSDP2 page: https://docs.pytorch.org/tutorials/intermediate/FS
 
 Link to the FSDP paper: https://arxiv.org/pdf/2304.11277
 
-to run it, use torchrun command: 'torchrun --nproc_per_node 2 ./fsdp2_basic.py --save-every=20 --batch-size=10'
+to run it, use torchrun command: `torchrun --nproc_per_node 2 ./fsdp2_basic.py --save-every=20 --batch-size=16`
 
-where '--nproc_per_node' specifies how many GPUs do you wanna use in the training.
+where `--nproc_per_node` specifies how many GPUs do you wanna use in the training.
 
-To inspect GPU utiliazation, open a terminal and run command: 'nvidia-smi'
+To inspect GPU utiliazation, open a terminal and run command: `nvidia-smi`
