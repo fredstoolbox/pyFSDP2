@@ -1,5 +1,5 @@
 # pyFSDP2
-This example training script uses pytorch's Fully Sharded Data Parallel to train a simple conv network. The script is meant to illustrate the basic steps for setting up FSDP pipeline to train custom model on multi-node, multi-GPUs.
+This example training script uses pytorch's Fully Sharded Data Parallel to train a simple conv network. The script is meant to illustrate the basic steps for setting up FSDP pipeline to train custom model on a multi-GPUs environment.
 
 Link to pytorch's FSDP2 page: https://docs.pytorch.org/tutorials/intermediate/FSDP_tutorial.html
 
