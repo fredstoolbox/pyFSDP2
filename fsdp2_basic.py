@@ -84,7 +84,7 @@ def TrainingProcessMain(args):
     #     calc loss
     #     backward pass
     #     optimizer step
-    # destroy process group to cleam mem
+    # destroy process group to clean mem
 
     logging.info(f'{datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")}')
 
@@ -200,6 +200,7 @@ def TrainingProcessMain(args):
         deltatime = datetime.datetime.now() - timenow
         logging.info(f'epoch {epoch} rank {local_train_param.local_rank}, epoch time {deltatime.total_seconds()}')
 
+    # clean up the process group before exiting
     dist.destroy_process_group()
 
 
@@ -215,7 +216,8 @@ if __name__ == "__main__":
     parser.add_argument("--save-every", type=int, default=5)
     parser.add_argument("--gradient-accumulation-iter", type=int, default=0)
     args = parser.parse_args()
-    
+
+    # setup logging to file and stdout
     logging.basicConfig(filename='myapp.log', level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
     logging.getLogger().addHandler(logging.StreamHandler(sys.stdout)) #log to stdout and a file
     
