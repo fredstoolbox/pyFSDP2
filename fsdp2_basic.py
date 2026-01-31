@@ -108,14 +108,18 @@ def TrainingProcessMain(args):
     # instantiate a local object just to keep tracks of all the params
     local_train_param = TrainerParams(Rank=rank, Device=my_device, BatchSize=args.batch_size, GradientAccumulationIteration=args.gradient_accumulation_iter, SaveEvery=args.save_every)
     
-    # Setting things up
-    #---------------------
+    # Setting things up for Fully Sharded Data Parallel (FSDP2) training
+    #-------------------------------
 
     # init process group using default backend, this is required for DDP and FSDP
     fsdp2_setup(device=local_train_param.device, rank=local_train_param.local_rank)
 
     # instantiate a model as per normal
-    model = DnCNN(channels=3, num_of_layers=17)
+    # the dnCNN is a simple conv net for image denoising, 
+    # takes a noisy 3 channel image as input, 
+    # expects a clean 3 channel image as output
+    
+    model = DnCNN(num_layers=17, num_features=64)
     if local_train_param.local_rank == 0:
         logging.info(f'{model}')        
 
@@ -126,8 +130,8 @@ def TrainingProcessMain(args):
             param_dtype=torch.bfloat16,
             reduce_dtype=torch.float32,
         )
-    # decompose model to shards
-    for layer in model.dncnn:   #this particular model put layers in its attribute .dncnn
+    # partition model to shards
+    for layer in model.layers:  
         fully_shard(layer, **fsdp_kwargs)
     fully_shard(model, **fsdp_kwargs)
     
@@ -160,11 +164,11 @@ def TrainingProcessMain(args):
     )
     
     # data loader's shuffle is done by the distributed sampler
-    trainning_dataloader = DataLoader(dataset= dataset, batch_size=local_train_param.batch_size, shuffle=False, sampler=dSampler, num_workers=2, pin_memory=True, drop_last=False) #num_worker forced more paralleism between learning and data loading (gpu v cpu tasks). seems 1 is ok, more than 1 causes lot of memory usage (160GB)
+    trainning_dataloader = DataLoader(dataset= dataset, batch_size=local_train_param.batch_size, shuffle=False, sampler=dSampler, num_workers=1, pin_memory=True, drop_last=False) #num_worker forced more paralleism between learning and data loading (gpu v cpu tasks). seems 1 is ok, more worker means more cpu memory usage
     
     # training loop
-    #--------------------------
-    # doing epoch stuff
+    #-----------------------------
+    # epoch stuff, time it
     for epoch in range(10):
         timenow = datetime.datetime.now()
         trainning_dataloader.sampler.set_epoch(epoch) #init sampler for each epoch
